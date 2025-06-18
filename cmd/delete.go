@@ -1,40 +1,40 @@
 /*
 Copyright © 2024 lllllan
-
 */
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/lllllan02/expense-tracker/expense"
 	"github.com/spf13/cobra"
 )
+
+var ids []int
 
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "删除指定 id 的消费记录",
+	Long: `删除指定 id 的消费记录。
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("delete called")
+该命令会根据提供的消费记录 id 永久删除对应记录，并更新存储文件。
+删除操作不可逆，请谨慎使用。
+
+使用方法：
+  expense-tracker delete --id 123          # 删除 ID 为 123 的记录
+  expense-tracker delete --id 456 --id 789 # 同时删除多个记录
+
+参数说明：
+  -i --id 消费记录的唯一标识（必填）`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		expense.Delete(ids)
+		expense.SaveFile()
+		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// deleteCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// deleteCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	deleteCmd.Flags().IntSliceVarP(&ids, "id", "i", nil, "待删除的消费 id")
+	deleteCmd.MarkFlagRequired("id")
 }

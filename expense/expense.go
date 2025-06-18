@@ -2,6 +2,7 @@ package expense
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/mattn/go-runewidth"
@@ -16,7 +17,7 @@ type Expense struct {
 	Amount      float64   `json:"amount"`
 }
 
-func AddExpense(description, category string, amount float64) *Expense {
+func Add(description, category string, amount float64) *Expense {
 	data.MaxId++
 	data.Expenses = append(data.Expenses, Expense{
 		Id:          data.MaxId,
@@ -28,6 +29,16 @@ func AddExpense(description, category string, amount float64) *Expense {
 	})
 
 	return &data.Expenses[len(data.Expenses)-1]
+}
+
+func Delete(ids []int) {
+	deleted := make([]Expense, 0, len(data.Expenses))
+	for _, expense := range data.Expenses {
+		if !slices.Contains(ids, expense.Id) {
+			deleted = append(deleted, expense)
+		}
+	}
+	data.Expenses = deleted
 }
 
 type Expenses []Expense

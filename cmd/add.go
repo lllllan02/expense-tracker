@@ -39,20 +39,19 @@ var addCmd = &cobra.Command{
   expense-tracker add --description "地铁通勤" --category "交通" --amount 7.00
 
 添加成功后会显示新记录的唯一ID，可用于后续查询或修改操作。`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if amount <= 0 {
 			return fmt.Errorf("消费金额必须为正数")
 		}
-		return nil
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		e := expense.AddExpense(description, category, amount)
+
+		e := expense.Add(description, category, amount)
 		if err := expense.SaveFile(); err != nil {
-			fmt.Printf("添加消费记录失败: %v", err)
-			return
+			return fmt.Errorf("添加消费记录失败: %v", err)
 		}
 
 		fmt.Printf("添加消费记录成功 (ID: %d)\n", e.Id)
+
+		return nil
 	},
 }
 
