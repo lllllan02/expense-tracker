@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"slices"
 )
 
 var data Data
 
 type Data struct {
-	MaxId    int        `json:"max_id"`
-	Expenses []*Expense `json:"expenses"`
+	MaxId    int       `json:"max_id"`
+	Expenses []Expense `json:"expenses"`
 }
 
 func init() {
@@ -27,4 +28,16 @@ func init() {
 func SaveFile() error {
 	bytes, _ := json.MarshalIndent(data, "", " ")
 	return os.WriteFile("expense.json", bytes, 0644)
+}
+
+func List(category []string) Expenses {
+	expenses := make([]Expense, 0, len(data.Expenses))
+
+	for _, expense := range data.Expenses {
+		if len(category) == 0 || slices.Contains(category, expense.Category) {
+			expenses = append(expenses, expense)
+		}
+	}
+
+	return expenses
 }
