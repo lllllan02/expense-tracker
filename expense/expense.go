@@ -41,6 +41,15 @@ func Delete(ids []int) {
 	data.Expenses = deleted
 }
 
+func GetById(id int) *Expense {
+	for i := range data.Expenses {
+		if data.Expenses[i].Id == id {
+			return &data.Expenses[i]
+		}
+	}
+	return nil
+}
+
 type Expenses []Expense
 
 func (es Expenses) Print() {
