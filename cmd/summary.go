@@ -1,40 +1,70 @@
 /*
 Copyright © 2024 lllllan
-
 */
 package cmd
 
 import (
 	"fmt"
+	"time"
 
+	"github.com/lllllan02/expense-tracker/expense"
 	"github.com/spf13/cobra"
 )
+
+var summaryMonth int
 
 // summaryCmd represents the summary command
 var summaryCmd = &cobra.Command{
 	Use:   "summary",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "显示消费统计信息",
+	Long: `显示消费记录的统计信息，包括总支出金额和各类别分布。
+	
+该命令可以显示所有消费记录的总计，也可以按月份筛选显示特定月份的统计信息。
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("summary called")
+使用方法：
+  expense-tracker summary
+  expense-tracker summary --month 8
+  
+参数：
+  --month 指定月份（1-12），不指定则显示所有记录
+
+操作示例：
+  expense-tracker summary
+  # 总支出：¥20.00
+  
+  expense-tracker summary --month 8
+  # 8月份总支出：¥20.00
+  
+  expense-tracker summary --month 12
+  # 12月份总支出：¥150.00`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if summaryMonth < 0 || summaryMonth > 12 {
+			return fmt.Errorf("月份必须在 1-12 之间")
+		}
+
+		total, categoryTotals := expense.Summary(summaryMonth)
+
+		if summaryMonth == 0 {
+			fmt.Printf("总支出：¥%.2f\n", total)
+		} else {
+			monthName := time.Month(summaryMonth).String()
+			fmt.Printf("%s总支出：¥%.2f\n", monthName, total)
+		}
+
+		// 显示每个类别的统计
+		if len(categoryTotals) > 0 {
+			fmt.Println("\n按类别统计：")
+			for category, amount := range categoryTotals {
+				fmt.Printf("  %s：¥%.2f\n", category, amount)
+			}
+		}
+
+		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(summaryCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// summaryCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// summaryCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	summaryCmd.Flags().IntVarP(&summaryMonth, "month", "m", 0, "指定月份（1-12）")
 }

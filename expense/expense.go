@@ -50,6 +50,20 @@ func GetById(id int) *Expense {
 	return nil
 }
 
+func Summary(month int) (float64, map[string]float64) {
+	total := 0.0
+	categoryTotals := make(map[string]float64)
+
+	for _, expense := range data.Expenses {
+		if month == 0 || int(expense.CreatedAt.Month()) == month {
+			total += expense.Amount
+			categoryTotals[expense.Category] += expense.Amount
+		}
+	}
+
+	return total, categoryTotals
+}
+
 type Expenses []Expense
 
 func (es Expenses) Print() {
