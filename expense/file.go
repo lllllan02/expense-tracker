@@ -10,8 +10,9 @@ import (
 var data Data
 
 type Data struct {
-	MaxId    int       `json:"max_id"`
-	Expenses []Expense `json:"expenses"`
+	MaxId    int                `json:"max_id"`
+	Expenses []Expense          `json:"expenses"`
+	Budgets  map[string]float64 `json:"budgets"` // 格式: "08" -> 预算金额
 }
 
 func init() {
@@ -28,6 +29,10 @@ func init() {
 func SaveFile() error {
 	bytes, _ := json.MarshalIndent(data, "", " ")
 	return os.WriteFile("expense.json", bytes, 0644)
+}
+
+func GetData() *Data {
+	return &data
 }
 
 func List(category []string) Expenses {

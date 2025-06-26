@@ -64,6 +64,48 @@ func Summary(month int) (float64, map[string]float64) {
 	return total, categoryTotals
 }
 
+// SetBudget 设置指定月份的预算
+func SetBudget(month int, amount float64) error {
+	if month < 1 || month > 12 {
+		return fmt.Errorf("月份必须在 1-12 之间")
+	}
+	if amount < 0 {
+		return fmt.Errorf("预算金额不能为负数")
+	}
+
+	if data.Budgets == nil {
+		data.Budgets = make(map[string]float64)
+	}
+
+	key := fmt.Sprintf("%02d", month)
+	data.Budgets[key] = amount
+	return nil
+}
+
+// GetBudget 获取指定月份的预算
+func GetBudget(month int) (float64, bool) {
+	if data.Budgets == nil {
+		return 0, false
+	}
+
+	key := fmt.Sprintf("%02d", month)
+	amount, exists := data.Budgets[key]
+	return amount, exists
+}
+
+// CheckBudget 检查指定月份是否超预算
+func CheckBudget(month int) (float64, float64, bool, error) {
+	budget, exists := GetBudget(month)
+	if !exists {
+		return 0, 0, false, fmt.Errorf("未设置 %d月 的预算", month)
+	}
+
+	total, _ := Summary(month)
+	exceeded := total > budget
+
+	return budget, total, exceeded, nil
+}
+
 type Expenses []Expense
 
 func (es Expenses) Print() {

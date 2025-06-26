@@ -51,6 +51,14 @@ var addCmd = &cobra.Command{
 
 		fmt.Printf("添加消费记录成功 (ID: %d)\n", e.Id)
 
+		// 检查是否超预算
+		month := int(e.CreatedAt.Month())
+		budget, totalSpent, exceeded, err := expense.CheckBudget(month)
+		if err == nil && exceeded {
+			overAmount := totalSpent - budget
+			fmt.Printf("⚠️  警告：本月已超预算 ¥%.2f\n", overAmount)
+		}
+
 		return nil
 	},
 }
