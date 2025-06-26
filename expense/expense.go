@@ -1,7 +1,9 @@
 package expense
 
 import (
+	"encoding/csv"
 	"fmt"
+	"os"
 	"slices"
 	"time"
 
@@ -141,4 +143,40 @@ func (es Expenses) Print() {
 		amount := runewidth.FillRight(fmt.Sprintf("%.2f", e.Amount), widths[4]+2)
 		fmt.Printf("%s%s%s%s%s\n", id, date, description, category, amount)
 	}
+}
+
+// ExportToCSV 导出消费记录到CSV文件
+func ExportToCSV(filename string, month int) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("创建CSV文件失败: %v", err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// 写入CSV头部
+	header := []string{"ID", "创建时间", "消费描述", "消费类型", "消费金额"}
+	if err := writer.Write(header); err != nil {
+		return fmt.Errorf("写入CSV头部失败: %v", err)
+	}
+
+	// 写入数据行
+	for _, expense := range data.Expenses {
+		if month == 0 || int(expense.CreatedAt.Month()) == month {
+			row := []string{
+				fmt.Sprintf("%d", expense.Id),
+				expense.CreatedAt.Format("2006-01-02 15:04:05"),
+				expense.Description,
+				expense.Category,
+				fmt.Sprintf("%.2f", expense.Amount),
+			}
+			if err := writer.Write(row); err != nil {
+				return fmt.Errorf("写入CSV数据失败: %v", err)
+			}
+		}
+	}
+
+	return nil
 }
